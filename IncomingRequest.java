@@ -5,5 +5,5 @@ public class IncomingRequest {
   public String userName;
   public String billingAddress;
   public int amount;
-  public String cardnumber;
+  public String cardNumber;
 }

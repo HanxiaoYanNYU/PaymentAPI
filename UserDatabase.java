@@ -1,35 +1,50 @@
-//package com.glassdoor.test.intern.first;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserDatabase {
-  public Map<Integer, String> userNames = new HashMap<>();
-  public Map<Integer, String> addresses = new HashMap<>();
+public class UserDatabase implements AbstractDatabase {
 
-  public UserDatabase() {
-    readDB();
-  }
+  private static final Map<Integer, UserInfo> ID_TO_USERINFO = new HashMap<>();
 
-  public void readDB() {
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(
-        UserDatabase.class.getClassLoader().getResourceAsStream("user_database.txt")))) {
+  @Override
+  public void setup(String filepath) { readDB(filepath); }
 
+  public void readDB(String filepath) {
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(UserDatabase.class.getClassLoader().getResourceAsStream(filepath)))) {
       String line;
-      while ((line = br.readLine()) != null) {
-        String splits[] = line.split("\t");
-          userNames.put(Integer.parseInt(splits[0]), splits[1]);
-          addresses.put(Integer.parseInt(splits[0]), splits[2]);
-      }
+        while ((line = br.readLine()) != null) {
+          String splits[] = line.split("\t");
+          Integer userid = Integer.parseInt(splits[0]);
+          String username = splits[1];
+          String address = splits[2];
+          addUser(userid, username, address);
+        }
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public void add_new_user(Integer userid, String username, String address) {
-    userNames.put(userid, username);
-    addresses.put(userid, address);
+  @Override
+  public void addUser(Integer userid, String username, String address) throws Exception {
+    if (ID_TO_USERINFO.containsKey(userid)) {
+      throw new Exception("Input userid already exist.");
+    }
+    else {
+        ID_TO_USERINFO.put(userid, new UserInfo(username, address));
+    }
+  }
+
+  @Override
+  public UserInfo getUserInfo(Integer userid) {
+    UserInfo userInfo = null;
+    try {
+      if (!ID_TO_USERINFO.containsKey(userid)) throw new Exception("UserId not exist.");
+      userInfo = ID_TO_USERINFO.get(userid);
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      return userInfo;
+    }
   }
 }
